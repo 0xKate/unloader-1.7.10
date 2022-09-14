@@ -1,15 +1,15 @@
-package unloader;
+package com.unnoen.unloader;
 
-import net.minecraft.world.DimensionType;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,13 +36,12 @@ public class TickHandler {
     }
 
     private void handleDim(Integer id) {
-        WorldServer w = DimensionManager.getWorld(id);
-        DimensionType dimType = DimensionManager.getProviderType(id);
+        WorldServer ws = DimensionManager.getWorld(id);
+        WorldProvider wp = ws.provider;
 
-        String dimName = "";
-        if (dimType != null) {
-            dimName = dimType.getName();
-        }
+        String dimName = wp.getDimensionName();
+
+        // Do not continue if dimension name or id blacklisted
         for (String re : UnloaderConfig.blacklistDims) {
             if (dimName.matches(re)) {
                 return;
@@ -52,38 +51,41 @@ public class TickHandler {
             }
         }
 
-        if (dimType.shouldLoadSpawn()) {
+        IChunkProvider cp = ws.getChunkProvider();
+        // This logic is correct
+        // Do not continue if any loaded chunks
+        if (cp.getLoadedChunkCount() != 0) {
             return;
         }
-
-        ChunkProviderServer p = w.getChunkProvider();
-        if (p.getLoadedChunkCount() != 0) {
+        // This logic is backwards in yamp fork?
+        // Do not continue if any persistentChunks
+        if (!ForgeChunkManager.getPersistentChunksFor(ws).isEmpty()) {
             return;
         }
-        if (ForgeChunkManager.getPersistentChunksFor(w).isEmpty()) {
+        // This logic is backwards in yamp fork?
+        // Do not continue if any players in dim
+        if (!ws.playerEntities.isEmpty()) {
             return;
         }
-
-        if (w.playerEntities.isEmpty()) {
+        // This logic is backwards in yamp fork?
+        // Do not continue if any entities are loaded
+        if (!ws.loadedEntityList.isEmpty()) {
             return;
         }
-        if (w.loadedEntityList.isEmpty()) {
+        // This logic is backwards in yamp fork?
+        // Do not continue if any tile ents are loaded
+        if (!ws.loadedTileEntityList.isEmpty()) {
             return;
         }
-        if (w.loadedTileEntityList.isEmpty()) {
-            return;
-        }
-
-
 
         try {
-            w.saveAllChunks(true, null);
+            ws.saveAllChunks(true, null);
         } catch (MinecraftException e) {
             logger.error("Caught an exception while saving all chunks:", e);
         } finally {
-            MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(w));
-            w.flush();
-            DimensionManager.setWorld(id, null, w.getMinecraftServer());
+            MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(ws));
+            ws.flush();
+            DimensionManager.setWorld(id, null);
         }
     }
 }

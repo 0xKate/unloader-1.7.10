@@ -1,15 +1,10 @@
-package unloader;
+package com.unnoen.unloader;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.*;
 
-@Mod(
-        modid = UnloaderMod.MODID,
-        name = UnloaderMod.NAME,
-        version = "@VERSION@",
-        acceptableRemoteVersions = "*")
+@Mod(modid = UnloaderMod.MODID, name = UnloaderMod.NAME, version = "@VERSION@", acceptableRemoteVersions = "*")
 public class UnloaderMod {
     public static final String MODID = "unloader";
     public static final String NAME = "Unloader";
@@ -17,14 +12,14 @@ public class UnloaderMod {
     private TickHandler handler = null;
 
     @Mod.EventHandler
-    public void onServerStarting(FMLServerStartingEvent event) {
+    public void serverStarting(FMLServerStartingEvent event) {
         handler = new TickHandler();
-        MinecraftForge.EVENT_BUS.register(handler);
+        FMLCommonHandler.instance().bus().register(handler);
     }
 
     @Mod.EventHandler
-    public void onServerStopped(FMLServerStoppedEvent event) {
-        MinecraftForge.EVENT_BUS.unregister(handler);
+    public void serverStopping(FMLServerStoppedEvent event) {
+        FMLCommonHandler.instance().bus().unregister(handler);
         handler = null;
     }
 }

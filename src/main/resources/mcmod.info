@@ -1,13 +1,21 @@
-[
 {
-  "modid": "unloader",
-  "name": "Unloader",
-  "description": "Unload dimensions not in use.",
-  "version": "${version}",
-  "url": "https://github.com/yamporg/Unloader",
-  "authorList": [
-    "Ivan Trubach",
-    "Unnoen",
-  ]
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "${modId}",
+    "name": "${modName}",
+    "description": "Unload dimensions not in use.",
+    "version": "${modVersion}",
+    "mcversion": "${minecraftVersion}",
+    "url": "https://github.com/0xKate/Unloader-1.7.10",
+    "updateUrl": "",
+    "authorList": ["0xKate", "Ivan Trubach", "Unnoen"],
+    "credits": "Created by Unnoen, Forked by Ivan Trubach, Forked and backported by 0xKate",
+    "logoFile": "",
+    "screenshots": [],
+    "parent": "",
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": [],
+    "useDependencyInformation": true
+  }]
 }
-]

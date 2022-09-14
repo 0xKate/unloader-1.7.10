@@ -1,22 +1,43 @@
-package unloader;
+package com.unnoen.unloader;
 
-import net.minecraftforge.common.config.Config;
+import java.io.File;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
-@Config(modid = UnloaderMod.MODID)
-@Config.LangKey(UnloaderMod.MODID + ".config.title")
 public class UnloaderConfig {
-    @Config.Name("blacklistDims")
-    @Config.Comment({
-        "List of dimensions you don’t want to unload.",
-        "Can be dimension name or ID. Uses regular expressions.",
-    })
-    @Config.LangKey(UnloaderMod.MODID + ".config.blacklistDims")
-    public static String[] blacklistDims = {"0", "overworld"};
 
-    @Config.Name("unloadCheck")
-    @Config.Comment({
-        "Time (in ticks) to wait before checking dimensions",
-    })
-    @Config.LangKey(UnloaderMod.MODID + ".config.unloadCheck")
-    public static Integer unloadInterval = 600;
+    private static class Defaults {
+        public static final Integer unloadInterval = 600;
+        public static final String[] blacklistDims = {"0", "overworld"};
+    }
+
+    private static class Categories {
+        public static final String general = "general";
+    }
+
+    public static Integer unloadInterval = Defaults.unloadInterval;
+    public static String[] blacklistDims = Defaults.blacklistDims;
+
+    public static void syncronizeConfiguration(File configFile) {
+        Configuration configuration = new Configuration(configFile);
+        configuration.load();
+
+        Property unloadIntervalProperty = configuration.get(
+                Categories.general,
+                "unloadInterval",
+                Defaults.unloadInterval,
+                "Time (in ticks) to wait before checking dimensions");
+        unloadInterval = unloadIntervalProperty.getInt();
+
+        Property blacklistDimsProperty = configuration.get(
+                Categories.general,
+                "blacklistDims",
+                Defaults.blacklistDims,
+                "List of dimensions you don’t want to unload.\nCan be dimension name or ID. Uses regular expressions.");
+        blacklistDims = blacklistDimsProperty.getStringList();
+
+        if (configuration.hasChanged()) {
+            configuration.save();
+        }
+    }
 }
