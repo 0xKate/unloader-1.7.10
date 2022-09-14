@@ -74,6 +74,8 @@ public class TickHandler {
             return;
         }
 
+
+
         try {
             w.saveAllChunks(true, null);
         } catch (MinecraftException e) {
